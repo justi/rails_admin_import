@@ -172,6 +172,9 @@ module RailsAdminImport
 
       def csv_import(temp_file, lookup_field_name, associated_map, role, current_user)
         text        = File.read(temp_file)
+
+        text        = convert_to_valid_chars(text)
+       
         clean       = text.force_encoding('UTF-8').encode('UTF-8', :undef => :replace, :replace => '').gsub(/\n$/, '')
         file_check  = CSV.new(clean)
 
@@ -280,6 +283,28 @@ module RailsAdminImport
         end
   
         results
+      end
+
+      def convert_to_valid_chars(text)
+        chars_to_replace = {'Ĺ\u0081' => 'Ł',
+                            'Ĺ\u0082' => 'ł',
+                            'Ĺ\u0083' => 'Ń',
+                            'Ĺ\u0084' => 'ń',
+                            'Ĺ\u009A' => 'Ś',
+                            'Ĺ\u009B' => 'ś',
+                            'Ĺť'      => 'Ż',
+                            'Ĺź'      => 'ż',
+                            'Ĺš'      => 'Ź',
+                            'Ĺş'      => 'ź',
+                            'Ä'     => 'Ą',
+                            'Ä'     => 'ą',
+                            'Ä'     => 'Ę',
+                            'Ä'     => 'ę',
+                            'Ă\u0093' => 'Ó',
+                            'Ăł'      => 'ó'
+                           }
+       
+        text.gsub!(Regexp.union(chars_to_replace.keys), chars_to_replace)
       end
 
       def json_import(temp_file, lookup_field_name, associated_map, role, current_user)
